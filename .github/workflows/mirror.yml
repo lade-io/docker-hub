@@ -1,0 +1,44 @@
+name: Mirror
+on:
+  schedule:
+    - cron: '0 * * * *'
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: [library/golang, library/jruby, library/node, library/php, library/python, library/ruby]
+    steps:
+      - name: Fetch tags
+        uses: JamesIves/fetch-api-data-action@releases/v1
+        with:
+          TOKEN_ENDPOINT: https://auth.docker.io/token?service=registry.docker.io&scope=repository:${{ matrix.repo }}:pull
+          ENDPOINT: https://registry-1.docker.io/v2/${{ matrix.repo }}/tags/list
+          CONFIGURATION: '{"method": "GET", "headers": {"Authorization": "Bearer {{{ access_token }}}"}}'
+          SAVE_LOCATION: /tmp
+      - name: Write page
+        run: |
+          output=$(jq -r '"---", "permalink: /v2/${{ matrix.repo }}/tags/list", "---", .' <<< "$FETCH_API_DATA")
+          test -z "$output" || echo "$output" | install -D /dev/stdin ${{ matrix.repo }}.html
+      - name: Upload page
+        uses: actions/upload-artifact@v1
+        with:
+          name: mirror
+          path: .
+  push:
+    needs: fetch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v1
+        with:
+          name: mirror
+          path: .
+      - run: test -z "$(git status --porcelain)" || echo "::set-env name=PUSH::true"
+      - if: env.PUSH == 'true'
+        uses: ludeeus/action-push@master
+        env:
+          ACTION_MAIL: beornf@gmail.com
+          ACTION_NAME: Github Action
+          ACTION_BRANCH: master
+          ACTION_MESSAGE: Page update.
