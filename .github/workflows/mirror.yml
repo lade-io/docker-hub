@@ -16,6 +16,7 @@ jobs:
           ENDPOINT: https://registry-1.docker.io/v2/${{ matrix.repo }}/tags/list
           CONFIGURATION: '{"method": "GET", "headers": {"Authorization": "Bearer {{{ access_token }}}"}}'
           SAVE_LOCATION: /tmp
+          RETRY: true
       - name: Write page
         run: |
           output=$(jq -r '"---", "permalink: /v2/${{ matrix.repo }}/tags/list", "---", .' <<< "$FETCH_API_DATA")
