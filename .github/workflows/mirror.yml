@@ -35,7 +35,7 @@ jobs:
         with:
           name: mirror
           path: .
-      - run: test -z "$(git status --porcelain)" || echo "::set-env name=PUSH::true"
+      - run: test -z "$(git status --porcelain)" || echo "PUSH=true" >> $GITHUB_ENV
       - if: env.PUSH == 'true'
         uses: ludeeus/action-push@master
         env:
