@@ -10,7 +10,7 @@ jobs:
         repo: [library/golang, library/jruby, library/node, library/php, library/python, library/ruby]
     steps:
       - name: Fetch tags
-        uses: JamesIves/fetch-api-data-action@releases/v1
+        uses: JamesIves/fetch-api-data-action@adad3a6c1fb06f64e97e243a459e869836d612e5 # pin@releases/v1
         with:
           TOKEN_ENDPOINT: https://auth.docker.io/token?service=registry.docker.io&scope=repository:${{ matrix.repo }}:pull
           ENDPOINT: https://registry-1.docker.io/v2/${{ matrix.repo }}/tags/list
@@ -22,7 +22,7 @@ jobs:
           output=$(jq -r '"---", "permalink: /v2/${{ matrix.repo }}/tags/list", "---", .' <<< "$FETCH_API_DATA")
           test -z "$output" || echo "$output" | install -D /dev/stdin ${{ matrix.repo }}.html
       - name: Upload page
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@34622df80861c3ed63eb2bff892de2f1fbf4c9da # pin@v1
         with:
           name: mirror
           path: .
@@ -30,14 +30,14 @@ jobs:
     needs: fetch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v1
+      - uses: actions/checkout@f1d3225b5376a0791fdee5a0e8eac5289355e43a # pin@v2
+      - uses: actions/download-artifact@fdafc3f9f2e2a522dc1d230e6a03de57a1e71c95 # pin@v1
         with:
           name: mirror
           path: .
       - run: test -z "$(git status --porcelain)" || echo "PUSH=true" >> $GITHUB_ENV
       - if: env.PUSH == 'true'
-        uses: ludeeus/action-push@master
+        uses: ludeeus/action-push@0b7c1175655379c008f42bbaf524caa79cf89ec1 # pin@master
         env:
           ACTION_MAIL: beornf@gmail.com
           ACTION_NAME: Github Action
