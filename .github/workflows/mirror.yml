@@ -22,7 +22,7 @@ jobs:
           output=$(jq -r '"---", "permalink: /v2/${{ matrix.repo }}/tags/list", "---", .' <<< "$FETCH_API_DATA")
           test -z "$output" || echo "$output" | install -D /dev/stdin ${{ matrix.repo }}.html
       - name: Upload page
-        uses: actions/upload-artifact@34622df80861c3ed63eb2bff892de2f1fbf4c9da # pin@v1
+        uses: actions/upload-artifact@3446296876d12d4e3a0f3145a3c87e67bf0a16b5 # pin@v1
         with:
           name: mirror
           path: .
@@ -30,8 +30,8 @@ jobs:
     needs: fetch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@f1d3225b5376a0791fdee5a0e8eac5289355e43a # pin@v2
-      - uses: actions/download-artifact@fdafc3f9f2e2a522dc1d230e6a03de57a1e71c95 # pin@v1
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # pin@v2
+      - uses: actions/download-artifact@18f0f591fbc635562c815484d73b6e8e3980482e # pin@v1
         with:
           name: mirror
           path: .
