@@ -10,16 +10,16 @@ jobs:
         repo: [library/golang, library/jruby, library/node, library/php, library/python, library/ruby]
     steps:
       - name: Fetch tags
-        uses: JamesIves/fetch-api-data-action@adad3a6c1fb06f64e97e243a459e869836d612e5 # pin@releases/v1
+        uses: JamesIves/fetch-api-data-action@3b49449423080d07602d64adcb488c638484fb25 # pin@v2
         with:
-          TOKEN_ENDPOINT: https://auth.docker.io/token?service=registry.docker.io&scope=repository:${{ matrix.repo }}:pull
-          ENDPOINT: https://registry-1.docker.io/v2/${{ matrix.repo }}/tags/list
-          CONFIGURATION: '{"method": "GET", "headers": {"Authorization": "Bearer {{{ access_token }}}"}}'
-          SAVE_LOCATION: /tmp
-          RETRY: true
+          token-endpoint: https://auth.docker.io/token?service=registry.docker.io&scope=repository:${{ matrix.repo }}:pull
+          endpoint: https://registry-1.docker.io/v2/${{ matrix.repo }}/tags/list
+          configuration: '{"method": "GET", "headers": {"Authorization": "Bearer {{{ access_token }}}"}}'
+          save-location: /tmp
+          retry: true
       - name: Write page
         run: |
-          output=$(jq -r '"---", "permalink: /v2/${{ matrix.repo }}/tags/list", "---", .' <<< "$FETCH_API_DATA")
+          output=$(jq -r '"---", "permalink: /v2/${{ matrix.repo }}/tags/list", "---", .' <<< "$(printenv fetch-api-data)")
           test -z "$output" || echo "$output" | install -D /dev/stdin ${{ matrix.repo }}.html
       - name: Upload page
         uses: actions/upload-artifact@3446296876d12d4e3a0f3145a3c87e67bf0a16b5 # pin@v1
@@ -30,16 +30,17 @@ jobs:
     needs: fetch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # pin@v2
+      - uses: actions/checkout@f25a3a9f25bd5f4c5d77189cab02ff357b5aedeb # pin@v2
       - uses: actions/download-artifact@18f0f591fbc635562c815484d73b6e8e3980482e # pin@v1
         with:
           name: mirror
           path: .
       - run: test -z "$(git status --porcelain)" || echo "PUSH=true" >> $GITHUB_ENV
       - if: env.PUSH == 'true'
-        uses: ludeeus/action-push@0b7c1175655379c008f42bbaf524caa79cf89ec1 # pin@master
-        env:
-          ACTION_MAIL: beornf@gmail.com
-          ACTION_NAME: Github Action
-          ACTION_BRANCH: master
-          ACTION_MESSAGE: Page update.
+        uses: github-actions-x/commit@722d56b8968bf00ced78407bbe2ead81062d8baa # pin@v2.9
+        with:
+          github-token: ${{ github.token }}
+          email: beornf@gmail.com
+          name: Github Action
+          push-branch: master
+          commit-message: Page update.
