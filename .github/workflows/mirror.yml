@@ -16,10 +16,11 @@ jobs:
           endpoint: https://registry-1.docker.io/v2/${{ matrix.repo }}/tags/list
           configuration: '{"method": "GET", "headers": {"Authorization": "Bearer {{{ access_token }}}"}}'
           save-location: /tmp
+          set-output: false
           retry: true
       - name: Write page
         run: |
-          output=$(jq -r '"---", "permalink: /v2/${{ matrix.repo }}/tags/list", "---", .' <<< "$(printenv fetch-api-data)")
+          output=$(jq -r '"---", "permalink: /v2/${{ matrix.repo }}/tags/list", "---", .' /tmp/data.json)
           test -z "$output" || echo "$output" | install -D /dev/stdin ${{ matrix.repo }}.html
       - name: Upload page
         uses: actions/upload-artifact@3446296876d12d4e3a0f3145a3c87e67bf0a16b5 # pin@v1
