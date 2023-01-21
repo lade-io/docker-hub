@@ -10,7 +10,7 @@ jobs:
         repo: [library/golang, library/jruby, library/node, library/php, library/python, library/ruby]
     steps:
       - name: Fetch tags
-        uses: JamesIves/fetch-api-data-action@3b49449423080d07602d64adcb488c638484fb25 # pin@v2
+        uses: JamesIves/fetch-api-data-action@396ebea7d13904824f85b892b1616985f847301c # pin@v2
         with:
           token-endpoint: https://auth.docker.io/token?service=registry.docker.io&scope=repository:${{ matrix.repo }}:pull
           endpoint: https://registry-1.docker.io/v2/${{ matrix.repo }}/tags/list
@@ -31,7 +31,7 @@ jobs:
     needs: fetch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@f25a3a9f25bd5f4c5d77189cab02ff357b5aedeb # pin@v2
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # pin@v3
       - uses: actions/download-artifact@18f0f591fbc635562c815484d73b6e8e3980482e # pin@v1
         with:
           name: mirror

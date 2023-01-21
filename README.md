@@ -1,6 +1,6 @@
 # Docker Hub
 
-[![Build Status](https://img.shields.io/github/workflow/status/lade-io/docker-hub/Mirror.svg)](https://github.com/lade-io/docker-hub/actions/workflows/mirror.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/lade-io/docker-hub/mirror.yml)](https://github.com/lade-io/docker-hub/actions/workflows/mirror.yml)
 
 This is a [Docker Hub](https://hub.docker.com) mirror hosted by [Github Pages](https://pages.github.com).
 
