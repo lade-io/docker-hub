@@ -7,35 +7,36 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        repo: [library/golang, library/jruby, library/node, library/php, library/python, library/ruby]
+        repo: [golang, jruby, node, php, python, ruby]
     steps:
       - name: Fetch tags
-        uses: JamesIves/fetch-api-data-action@396ebea7d13904824f85b892b1616985f847301c # pin@v2
+        uses: JamesIves/fetch-api-data-action@9120fcc59146b9245c9843e0ee8037d9dce37462 # pin@v2
         with:
-          token-endpoint: https://auth.docker.io/token?service=registry.docker.io&scope=repository:${{ matrix.repo }}:pull
-          endpoint: https://registry-1.docker.io/v2/${{ matrix.repo }}/tags/list
+          token-endpoint: https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/${{ matrix.repo }}:pull
+          endpoint: https://registry-1.docker.io/v2/library/${{ matrix.repo }}/tags/list
           configuration: '{"method": "GET", "headers": {"Authorization": "Bearer {{{ access_token }}}"}}'
           save-location: /tmp
           set-output: false
           retry: true
       - name: Write page
         run: |
-          output=$(jq -r '"---", "permalink: /v2/${{ matrix.repo }}/tags/list", "---", .' /tmp/data.json)
-          test -z "$output" || echo "$output" | install -D /dev/stdin ${{ matrix.repo }}.html
+          output=$(jq -r '"---", "permalink: /v2/library/${{ matrix.repo }}/tags/list", "---", .' /tmp/data.json)
+          test -z "$output" || echo "$output" | install -D /dev/stdin library/${{ matrix.repo }}.html
       - name: Upload page
-        uses: actions/upload-artifact@3446296876d12d4e3a0f3145a3c87e67bf0a16b5 # pin@v1
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # pin@v4
         with:
-          name: mirror
+          name: mirror-${{ matrix.repo }}
           path: .
   push:
     needs: fetch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # pin@v3
-      - uses: actions/download-artifact@18f0f591fbc635562c815484d73b6e8e3980482e # pin@v1
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # pin@v4
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # pin@v4
         with:
-          name: mirror
+          pattern: mirror-*
           path: .
+          merge-multiple: true
       - run: test -z "$(git status --porcelain)" || echo "PUSH=true" >> $GITHUB_ENV
       - if: env.PUSH == 'true'
         uses: github-actions-x/commit@722d56b8968bf00ced78407bbe2ead81062d8baa # pin@v2.9
